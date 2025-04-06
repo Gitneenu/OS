@@ -18,7 +18,7 @@ void display(int f,int frames[f])
 	printf("\n");
 }
 
-void fcfs(int f,int p,int pages[p],int frames[f])
+void fifo(int f,int p,int pages[p],int frames[f])
 {
 	int pagefault=0;
 	int rear=0;
@@ -68,7 +68,7 @@ int main()
 		scanf("%d",&pages[i]);
 	}
 	
-	fcfs(f,p,pages,frames);
+	fifo(f,p,pages,frames);
 	
 	
 }
