@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FILES 10
+#define FILENAME_LEN 20
+
+// Structure to represent a block
+struct Block {
+    int block_number;
+    struct Block* next;
+};
+
+// Structure to represent a file
+struct File {
+    char filename[FILENAME_LEN];
+    struct Block* head;
+};
+
+// Function to allocate a new block
+struct Block* allocateBlock(int blockNumber) {
+    struct Block* newBlock = (struct Block*)malloc(sizeof(struct Block));
+    newBlock->block_number = blockNumber;
+    newBlock->next = NULL;
+    return newBlock;
+}
+
+int main() {
+    int numFiles;
+    struct File files[MAX_FILES];
+
+    printf("Enter the number of files: ");
+    scanf("%d", &numFiles);
+
+    for (int i = 0; i < numFiles; i++) {
+        printf("\nEnter name of file %d: ", i + 1);
+        scanf("%s", files[i].filename);
+
+        int numBlocks;
+        printf("Enter number of blocks for %s: ", files[i].filename);
+        scanf("%d", &numBlocks);
+
+        files[i].head = NULL;
+        struct Block* current = NULL;
+
+        printf("Enter %d block numbers: ", numBlocks);
+        for (int j = 0; j < numBlocks; j++) {
+            int blockNum;
+            scanf("%d", &blockNum);
+            struct Block* newBlock = allocateBlock(blockNum);
+
+            if (files[i].head == NULL) {
+                files[i].head = newBlock;
+                current = newBlock;
+            } else {
+                current->next = newBlock;
+                current = current->next;
+            }
+        }
+    }
+
+    // Display the allocated blocks
+    printf("\nLinked File Allocation Table:\n");
+    for (int i = 0; i < numFiles; i++) {
+        printf("File: %s\nBlocks: ", files[i].filename);
+        struct Block* temp = files[i].head;
+        while (temp != NULL) {
+            printf("%d -> ", temp->block_number);
+            temp = temp->next;
+        }
+        printf("NULL\n");
+    }
+
+    // Clean up memory
+    for (int i = 0; i < numFiles; i++) {
+        struct Block* temp = files[i].head;
+        while (temp != NULL) {
+            struct Block* toFree = temp;
+            temp = temp->next;
+            free(toFree);
+        }
+    }
+
+    return 0;
+}
