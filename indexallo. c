@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FILES 10
+#define MAX_BLOCKS 100
+#define MAX_FILENAME 20
+#define MAX_FILE_BLOCKS 20
+
+// Structure to represent an index block
+struct IndexBlock {
+    int data_blocks[MAX_FILE_BLOCKS];
+    int count;
+};
+
+// Structure to represent a file
+struct File {
+    char filename[MAX_FILENAME];
+    int index_block;
+    struct IndexBlock index;
+};
+
+// Initialize the index block
+void initializeIndexBlock(struct IndexBlock* indexBlock) {
+    for (int i = 0; i < MAX_FILE_BLOCKS; ++i) {
+        indexBlock->data_blocks[i] = -1;
+    }
+    indexBlock->count = 0;
+}
+
+// Allocate a block to the file's index block
+int allocateDataBlock(struct IndexBlock* indexBlock, int blockNumber) {
+    if (indexBlock->count >= MAX_FILE_BLOCKS) return 0; // Full
+    indexBlock->data_blocks[indexBlock->count++] = blockNumber;
+    return 1;
+}
+
+// Read data from a file
+void readData(struct File files[], int fileCount, int blockToRead) {
+    int found = 0;
+    for (int i = 0; i < fileCount; i++) {
+        for (int j = 0; j < files[i].index.count; j++) {
+            if (files[i].index.data_blocks[j] == blockToRead) {
+                printf("Reading data from block %d (File: %s)\n", blockToRead, files[i].filename);
+                found = 1;
+            }
+        }
+    }
+    if (!found) {
+        printf("Block %d is not allocated.\n", blockToRead);
+    }
+}
+
+int main() {
+    struct File files[MAX_FILES];
+    int fileCount;
+
+    printf("Enter number of files: ");
+    scanf("%d", &fileCount);
+
+    for (int i = 0; i < fileCount; i++) {
+        printf("\nEnter file name: ");
+        scanf("%s", files[i].filename);
+
+        printf("Enter index block number for %s: ", files[i].filename);
+        scanf("%d", &files[i].index_block);
+
+        initializeIndexBlock(&files[i].index);
+
+        int numBlocks;
+        printf("Enter number of data blocks: ");
+        scanf("%d", &numBlocks);
+
+        printf("Enter %d data block numbers: ", numBlocks);
+        for (int j = 0; j < numBlocks; j++) {
+            int blockNumber;
+            scanf("%d", &blockNumber);
+            if (!allocateDataBlock(&files[i].index, blockNumber)) {
+                printf("Error: Too many blocks for file %s\n", files[i].filename);
+                break;
+            }
+        }
+    }
+
+    // Display index block table
+    printf("\nIndexed File Allocation Table:\n");
+    for (int i = 0; i < fileCount; i++) {
+        printf("File: %s | Index Block: %d | Data Blocks: ", files[i].filename, files[i].index_block);
+        for (int j = 0; j < files[i].index.count; j++) {
+            printf("%d ", files[i].index.data_blocks[j]);
+        }
+        printf("\n");
+    }
+
+    // Read block test
+    int query;
+    printf("\nEnter a block number to read: ");
+    scanf("%d", &query);
+    readData(files, fileCount, query);
+
+    return 0;
+}
