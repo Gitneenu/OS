@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_BLOCKS 100
+
+struct File {
+    char filename[20];
+    int start_block;
+    int num_blocks;
+};
+
+int main() {
+    int n; // Total number of blocks
+    printf("Enter total number of blocks in disk (max %d): ", MAX_BLOCKS);
+    scanf("%d", &n);
+    
+    if (n > MAX_BLOCKS || n <= 0) {
+        printf("Invalid number of blocks.\n");
+        return 1;
+    }
+
+    int disk[MAX_BLOCKS] = {0}; // 0 = free, 1 = occupied
+
+    int m; // Number of files
+    printf("Enter number of files to store: ");
+    scanf("%d", &m);
+
+    struct File files[m];
+
+    for (int i = 0; i < m; i++) {
+        printf("\nEnter file name: ");
+        scanf("%s", files[i].filename);
+
+        printf("Enter number of blocks needed for %s: ", files[i].filename);
+        scanf("%d", &files[i].num_blocks);
+
+        int found = 0;
+
+        // Search for contiguous free blocks
+        for (int j = 0; j <= n - files[i].num_blocks; j++) {
+            int free = 1;
+            for (int k = 0; k < files[i].num_blocks; k++) {
+                if (disk[j + k] == 1) {
+                    free = 0;
+                    break;
+                }
+            }
+
+            if (free) {
+                // Allocate blocks
+                files[i].start_block = j;
+                for (int k = 0; k < files[i].num_blocks; k++) {
+                    disk[j + k] = 1;
+                }
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            files[i].start_block = -1;
+            printf("Allocation failed for file %s\n", files[i].filename);
+        }
+    }
+
+    // Output allocation table
+    printf("\nFile Allocation Table:\n");
+    printf("Filename\tStart Block\tBlocks\n");
+    for (int i = 0; i < m; i++) {
+        if (files[i].start_block != -1)
+            printf("%s\t\t%d\t\t%d\n", files[i].filename, files[i].start_block, files[i].num_blocks);
+    }
+
+    return 0;
+}
